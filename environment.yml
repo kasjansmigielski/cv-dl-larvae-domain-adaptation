@@ -1,0 +1,18 @@
+name: cv-dl-larvae
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - opencv
+  - numpy
+  - pandas
+  - matplotlib
+  - ipython
+  - jupyterlab
+  - pathlib
+  - nbstripout
+  - pip:
+    - python-docx
+    - boto3
+    - python-dotenv
