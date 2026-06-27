@@ -1,82 +1,80 @@
-# Classical CV vs. Deep Learning for Robust Invertebrate Larval Tracking Under Varying Illumination Conditions
+# CV–DL Larvae Domain Adaptation
 
-> **Status:** WIP — code and results will be added as experiments are completed.
+Code accompanying the publication on automated tracking and behavioral analysis of
+*Galleria mellonella* larvae, combining classical computer vision, deep learning
+(YOLOv8 instance segmentation + ByteTrack), and generative domain adaptation
+(CycleGAN, StyleGAN2-ADA) to bridge the gap between imaging sessions.
 
-## Overview
-
-This repository contains the source code and experimental pipeline accompanying the manuscript submitted to *Computers in Biology and Medicine*.
-
-We present a comparative study of classical computer vision (CV) and deep learning (DL) approaches for automated tracking of invertebrate larvae (*Zophobas morio*) across sessions with different illumination conditions. The key contributions are:
-
-- **End-to-end classical CV pipeline** — adaptive preprocessing (CLAHE), background subtraction, contour-based detection
-- **Deep learning baseline** — YOLOv8-based detection with within-session and cross-session evaluation
-- **Generative data augmentation** — GAN-synthesized training data to improve detector robustness
-- **Domain adaptation** — CycleGAN-based illumination transfer (Session I - Session II) to bridge the domain gap without manual re-annotation
-- **Behavioral analysis** — trajectory-derived metrics (velocity, distance, movement patterns) demonstrating biological interpretability
-
-## Repository Structure
+## Repository structure
 
 ```
-├── configs/              # Experiment configurations (CV params, YOLO config)
-├── data/                 # Data files and download instructions 
-├── notebooks/            # Jupyter notebooks for exploration and visualization
-├── results/              # Generated tables (CSV) and figures (PNG)
+.
+├── data/                       # Raw video download scripts (S3)
+├── notebooks/
+│   └── cv_pipeline/            # Classical CV pipeline (OpenCV) as notebooks
+│       ├── 01_area_selection.ipynb
+│       ├── 02_dish_isolation.ipynb
+│       ├── 03_larva_tracker.ipynb
+│       ├── 04_kinematics.ipynb
+│       ├── 05_plot_generator.ipynb
+│       └── 06_angle_processor.ipynb
 ├── src/
-│   ├── cv_pipeline/      # Classical CV: detection, tracking, preprocessing
-│   ├── dl_pipeline/      # Deep learning: YOLO, GAN, CycleGAN
-│   ├── analysis/         # Behavioral metrics, heatmaps, statistical tests
-│   └── visualization/    # Figure and table generation for the manuscript
-├── environment.yml       # Conda environment specification
-└── requirements.txt      # Python dependencies (pip)
+│   └── dl_pipeline/
+│       ├── yolo/               # YOLOv8-seg training, tracking, evaluation
+│       └── gan/
+│           ├── cyclegan/       # Unpaired domain translation
+│           ├── stylegan/       # Synthetic data + pseudo-labeling
+│           └── eval/           # A/B/C augmentation evaluation (SLURM)
+├── results/                    # (git-ignored) generated outputs
+├── environment.yml             # Conda environment (recommended)
+├── requirements.txt            # pip alternative
+└── .env.example                # Template for S3 credentials
 ```
-
-## Requirements
-
-- Python ≥ 3.11
-- Key dependencies: OpenCV, NumPy, SciPy, scikit-image, matplotlib, pandas
-- DL experiments additionally require: PyTorch, ultralytics (YOLOv8)
 
 ## Installation
 
-```bash
-# Option A: conda (recommended)
-git clone https://github.com/<user>/cv-dl-larvae-domain-adaptation.git
-cd cv-dl-larvae-domain-adaptation
-conda env create -f environment.yml
-conda activate cv-dl-larvae
+### Option A — Conda (recommended)
 
-# Option B: pip
-git clone https://github.com/<user>/cv-dl-larvae-domain-adaptation.git
-cd cv-dl-larvae-domain-adaptation
+```bash
+conda env create -f environment.yml
+conda activate larvixon
+```
+
+### Option B — pip / venv
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Data
+> For GPU-accelerated PyTorch, install the matching build, e.g.:
+> `pip install torch torchvision --index-url https://download.pytorch.org/whl/cu121`
 
-Video recordings of *Galleria mellonella* larvae were captured under two illumination conditions:
+## Configuration
 
+The data-download scripts read S3 credentials from environment variables:
 
-| Session    | Illumination | Frames  | Resolution |
-| ---------- | ------------ | ------- | ---------- |
-| Session I  | Top-down     | ~36 000 | 1920×1080  |
-| Session II | Bottom-up    | ~36 000 | 1920×1080  |
+```bash
+cp .env.example .env
+# then edit .env and fill in your S3 endpoint, keys, bucket and prefix
+```
 
+## Pipelines
 
-Due to file size constraints, raw video data is not included in this repository.
+1. **Classical CV** (`notebooks/cv_pipeline/`) — dish isolation, ROI/scale
+   calibration, larva tracking, kinematics and behavioral plots. Run the
+   notebooks in numerical order.
+2. **YOLO** (`src/dl_pipeline/yolo/`) — preprocess dishes, train a YOLOv8s-seg
+   baseline, track with ByteTrack and analyze, evaluate across sessions.
+3. **GAN** (`src/dl_pipeline/gan/`) — CycleGAN for illumination domain adaptation
+   and StyleGAN2-ADA for synthetic augmentation, with A/B/C evaluation. Training
+   scripts are provided as SLURM jobs for HPC clusters.
 
-## Results
+## Citation
 
-Key findings (classical CV pipeline):
+If you use this code, please cite the accompanying publication (see `CITATION`/paper).
 
+## License
 
-| Metric                        | Session I            | Session II |
-| ----------------------------- | -------------------- | ---------- |
-| Detection rate                | 99.05%               | 99.71%     |
-| Missing frame rate            | 0.95%                | 0.29%      |
-| Cross-session relative change | −0.66% (improvement) | —          |
-
-
-*DL comparison results and domain adaptation experiments will be added upon completion.*
-
-
-
+Released under the MIT License — see `LICENSE`.
