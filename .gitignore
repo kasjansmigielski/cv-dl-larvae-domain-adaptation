@@ -1,0 +1,54 @@
+# ===== Secrets =====
+.env
+.env.local
+*.pem
+*.key
+
+# ===== Data and models (too large / reproducible) =====
+records/
+videos/
+data/records/
+data/videos/
+models/
+*.pt
+*.pth
+*.pkl
+*.onnx
+
+# ===== Results =====
+results/
+tracking/
+heatmaps/
+bubble_plots/
+rose_diagrams/
+kinematic_metrics/
+runs/
+outputs/
+*.mp4
+*.mov
+*.avi
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# ===== Jupyter =====
+.ipynb_checkpoints/
+
+# ===== System / IDE =====
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# ===== HPC / SLURM logi =====
+slurm-*.out
+*.log
